@@ -1,0 +1,259 @@
+<!-- Panel for visualizing the processings -->
+
+<div class='proc_pics_panel' >
+
+    <!-- Title -->
+
+    <div id='experim_title' class=""> Title </div>
+
+    <!-- inserted image -->
+
+    <img id="curr_proc_pic" style="line-height : 20px;"  ></img>
+
+    <!-- canvas for superimpositions -->
+
+    <canvas id="canvas_area" style="line-height : 20px;" ></canvas>
+
+    <!-- arrows left right for navigating in the pictures  -->
+
+    <img id="butt_img_up"  src="static/icons/capicon/svg/276.svg"  >
+    <img id="butt_img_down"  src="static/icons/capicon/svg/277.svg"  >
+
+    <!-- position of the current frame -->
+
+    <div id='win_num_im' ></div>
+
+    <!-- slider for selecting frame -->
+
+    <div class="">
+        <input id="pospic" data-slider-id='ex1Slider' type="text"
+               data-slider-min="0" data-slider-max="120"
+               data-slider-step="1" data-slider-value="0"/>
+     </div>
+
+</div>
+
+<!-- Reinit cells -->
+
+clear selected cells:
+<br>
+<button type="button" id='reinit_cells'
+        class="btn btn-primary">reinit cells</button>
+<!-- <button type="button" id='select_all_cells' class="btn btn-primary">select all cells</button> -->
+
+
+<!-- View kind, BF, fluo1, fluo2, tracking, lineage etc.. -->
+
+<br>
+kind of view:
+<div id="kind_view"  >
+
+    <select id="select_view"  class="selectpicker"  >
+
+          <option selected value='track'> tracking </option>
+          <option  value='BF'> BF </option>
+          <option  value='fluo1'> fluo1 </option>
+          <option  value='fluo2'> fluo2 </option>
+          <option  value='lineage'> lineage </option>
+
+    </select>
+</div>
+
+<!-- kind of tool for selecting cells -->
+
+way to select cells:
+<div id="kind_tool"  >
+
+    <select id="select_tool"  class="selectpicker"  >
+
+          <option selected value='pick_cells'> pick cells </option>
+          <option  value='select_area'> select area </option>
+
+    </select>
+</div>
+
+<!-- Method for changing of image, hovering or clicking on the arrows -->
+
+way of changing of picture:
+<div id="kind_read_pics"  >
+
+    <select id="read_pics"  class="selectpicker"  >
+
+          <option  value='click'> click </option>
+          <option  selected  value='hover'> hover </option>
+
+    </select>
+</div>
+
+<script >
+
+  $(document).ready(function(){
+
+          var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+          socket.on('response', function(mess){})
+
+          click_cell = true
+          select_area = false
+          max_nb_im = 0
+          socket.on('nb_pics', function(nb_pics){
+              max_nb_im = nb_pics                                                             // number of frames
+              //alert('max_nb_im ' + max_nb_im)
+              $("#pospic").bootstrapSlider('setAttribute', 'max', max_nb_im)                  // slider size
+              //$("#pospic").bootstrapSlider('setValue', frame_index)
+              $('#pospic').bootstrapSlider('refresh')
+            })
+          frame_index = 0                                                                     // current frame index
+
+          $('#curr_proc_pic').attr('src', 'static/pictures/track/frame0.png')                 // init the view on tracking images
+
+          // Change image
+
+          function repl_pic(pic, num) {
+
+              return pic.replace(/frame\d+\.png/, 'frame' + (num) + '.png')               // change image name with current frame index
+         }
+
+          var img_up_dwn = function(arg){
+
+              /*
+              Go up and down in the images..
+              */
+
+              //--------
+              var curr_pic = $('#curr_proc_pic').attr('src').split('?')[0]
+              //alert('curr_pic ' + curr_pic )
+              frame_index = curr_pic.match(/frame(\d+?)\.png/)[1]                              // frame index
+              //alert('curr_pic ' + curr_pic + 'frame_index ' + frame_index)
+              //--------
+              var num = parseInt(frame_index)
+              $('#win_num_im').text(num + '/' + max_nb_im)                                                               // curr / max
+              //--------
+              if (arg == 'down'){if (num > 0){curr_pic = repl_pic(curr_pic, num-1)}}                             // decrement
+              else if (arg == 'up') {if (num < max_nb_im-1) {curr_pic =  repl_pic(curr_pic, num+1)} }            // increment
+              $('#curr_proc_pic').attr('src', curr_pic + '?' + new Date().getTime())
+
+              frame_index = curr_pic.match(/frame(\d+?)\.png/)[1]                              // refresh frame index
+              $("#pospic").bootstrapSlider('setValue', frame_index)                            // slider follows
+
+          }
+
+           var img_dir = null;
+
+           function change_pic(delay, dir){
+                           //alert('delay ' + delay + ' dir ' +dir)
+                           img_dir = setInterval(function(){img_up_dwn(dir)}, delay)
+
+                           }
+
+           var pic_speed = 80                        // speed  of image changement when hovering the arrows
+
+           function arrow_hover(){                   // change of image when hovering on the arrow
+               //alert('bind with hover !!! ')
+               $('#butt_img_up').mouseenter(function(){change_pic(pic_speed, 'up')})
+                                .mouseleave(function(){clearInterval(img_dir)})
+               $('#butt_img_down').mouseenter(function(){change_pic(pic_speed, 'down')})
+                                  .mouseleave(function(){clearInterval(img_dir)})
+
+          }
+
+           function arrow_click(){                                             // change of image when clicking on the arrow
+               //alert('bind with click !!! ')
+               $('#butt_img_up').click(function(){img_up_dwn('up')})
+               $('#butt_img_down').click(function(){img_up_dwn('down')})
+
+          }
+
+           function unbind_arrows(){                                           // unbind the arrows
+               //alert('unbinding !!! ')
+               $('#butt_img_up').unbind()
+               $('#butt_img_down').unbind()
+          }
+
+           arrow_hover()                                                                        // hover at initialization
+
+           //------------------- Bootstrap slider for the pics
+
+           $('#pospic').bootstrapSlider({                                                      // Bootstrap slider
+               	formatter: function(num) {
+                      //$('#snap_panel').css({'opacity':value})
+                      var curr_pic = $('#curr_proc_pic').attr('src').split('?')[0]
+                      $('#slider_value').text(num)
+                      var curr_pic = repl_pic(curr_pic, num)
+                      $('#curr_proc_pic').attr('src', curr_pic + '?' + new Date().getTime())
+                      $('#win_num_im').text(num + '/' + max_nb_im)
+
+                      frame_index = curr_pic.match(/frame(\d+?)\.png/)[1]                       // refresh frame index
+
+                   		return 'Current value: ' + num;
+                   	}
+          });
+
+        //------------------- pick cells
+
+        {% include 'pick_cells.html' %}
+
+        //------------------- select cells with areas
+
+        {% include 'select_area.html' %}
+
+        //------------------- Reinitialise selected cells
+
+         $("#reinit_cells").click(function(){
+              socket.emit("reinit_cells", '')
+           })
+
+        //------------------- Select all cells
+
+        {% include 'select_all_cells.html' %}
+
+        //------------------- Prevent from dragging
+
+        $('#curr_proc_pic').on('dragstart', function(event) {event.preventDefault();});              // prevent image drag
+        // $('#curr_proc_pic').on('dragstart', false);
+
+        //------------------- Change the view (BF, fluo1, fluo2, tracking, lineage etc..)
+
+        $('#select_view').on('change', function() {                                                   // select the view BF, fluo etc..
+
+            curr_view = $(this).val()
+            $('#curr_proc_pic').attr('src', 'static/pictures/' + curr_view + '/frame0.png')            // change of folder
+            $("#pospic").bootstrapSlider('setValue', frame_index)                                      // slider follows the index
+
+       });
+
+        //-------------------     Change how the images are read
+
+        // select how images are ead (click or hover)
+
+        $('#read_pics').on('change', function() {
+
+            read_pic_kind = $(this).val()
+            //alert(read_pic_kind)
+            unbind_arrows()
+            if (read_pic_kind == 'hover'){
+                    arrow_hover()
+                }
+            else if (read_pic_kind == 'click'){
+                    arrow_click()
+                }
+
+       });
+
+        //-------------------       Tools for selecting cells, pick/hover
+
+        {% include 'select_tool.html' %}
+
+        //------------------- Title
+
+        // refresh title
+
+        setInterval(function(){socket.emit('retrieve_title')}, 2000)
+        socket.on('title', function(title){
+              $('#experim_title').text(title)
+        })
+
+
+ });
+
+</script>

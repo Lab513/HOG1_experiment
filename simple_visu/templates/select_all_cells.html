@@ -1,0 +1,8 @@
+
+
+$("#select_all_cells").click(function(){
+
+     var dic_frm_pos = {'frame': frame_index , 'x': 'all' , 'y': 'all'}
+     str_frm_pos = JSON.stringify(dic_frm_pos)
+     socket.emit("select_all_cells", str_frm_pos)
+  })

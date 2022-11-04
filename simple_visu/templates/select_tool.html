@@ -1,0 +1,19 @@
+
+$('#select_tool').on('change', function() {
+
+    curr_tool = $(this).val()
+    //alert('curr_tool ' + curr_tool)
+    if (curr_tool == 'pick_cells'){            // pick cells
+        $('#canvas_area').hide()
+        click_cell = true
+        select_area = false
+        ctx.clearRect(0, 0, 500, 500);            // clear selected area
+   }
+    else if (curr_tool == 'select_area'){      // select area
+        $('#canvas_area').show()
+        click_cell = false
+        select_area = true
+   }
+
+
+});
