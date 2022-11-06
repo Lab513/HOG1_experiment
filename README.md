@@ -1,11 +1,10 @@
-![Conditional Microscopy](interface/static/imgs/image_phare.png)
+![](misc/imgs/)
 
-# Image analysis for osmotic stress experiments
-
+# Image analysis for the HOG1 osmotic stress experiments
 
 ## Introduction
 
-This code has be written for analysing microfluidic experiments. It uses *Machine Learning* segmentation
+This code has be written for analysing microfluidic HOG1 experiments. It uses *Machine Learning* segmentation
 for extracting information at the single cell level.
 
 ## Installation
@@ -65,26 +64,46 @@ full information for installation procedure can be found here :
 
 </details>
 
+## Overview
 
-## Extracting the dataset
+The processing is done through two Jupyter notebooks.
+*extract_and_process_template.ipynb* and *visu_analyse_template.ipynb* which can be found in the *notebooks/process_and_analyse* folder. 
+The first one is for preparing the datasets and performing a segmentation and tracking.
+The second notebook is used for producing the analyses of the experiments using the initial datasets
+and both the segmentation and tracking obtained previously.
 
-## image processing
+## Prepare the dataset
 
-## Image analysis method to extract cell information
+![](misc/imgs/)
 
-StarDist
+## Segment and track
 
-### Segmentation
+![](misc/imgs/)
 
+## Analysis using the visualiser
 
-### Tracking
-
+### The Visualiser
 
 <details>
+<summary> installation in short, Click here to expand</summary>
 
+Brigthfield
+![BF](misc/imgs/visu/BF.PNG)
+Fluorescence
+![Fluorescence](misc/imgs/visu/GFF.PNG)
+Tracking
+![Tracking](misc/imgs/visu/tracking.PNG)
 
 </details>
 
+### Select the cells and produce the analysis
+
+The analyses are done by selecting the cells to be followed and by launching the
+Jupyter's cells corresponding to the desired observations.
+The results are csv files. Each csv file corresponds to a given observation.
+Each column of the this csv contains the values of the observation for a given cell.
+
+![Select and make the observation](misc/imgs/visu/visu_analyse.PNG)
 
 ## Contact
 
